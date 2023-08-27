@@ -41,7 +41,22 @@ game = (() => {
 
     }
 
-    function checkHorizontals(marker) {
+    function checkHorizontals(markerPlayed, squarePlayed) {
+
+        if (squarePlayed === 1 || 4 || 7) {
+            if (gameBoard.markerArray[squarePlayed - 1] === markerPlayed && gameBoard.markerArray[squarePlayed + 1] === markerPlayed) {
+                return true;
+            }
+        } else if (squarePlayed === 0 || 3 || 6 ) {
+            if (gameBoard.markerArray[squarePlayed + 2] === markerPlayed && gameBoard.markerArray[squarePlayed + 1] === markerPlayed) {
+                return true;
+            }
+        } else if (squarePlayed === 2 || 5 || 8 ) {
+            if (gameBoard.markerArray[squarePlayed - 2] === markerPlayed && gameBoard.markerArray[squarePlayed - 1] === markerPlayed) {
+                return true;
+            }
+        }
+
         return false;
         // take the marker, and check the following: matching marker at +1/-1 if index is 1/4/7, matching marker at +1/+2 if index is 0/3/6, matching marker at -1/-2 if index is 2/5/8
 
@@ -72,11 +87,11 @@ const player2 = player('Alex', 'O');
 //turn logic: user clicks empty square (disable squares that are not filled), square is updated with marker, check for win or full board, if no win, next turn.
 
 console.log(game.playMarker(player1.marker, 0));
-console.log(game.playMarker(player2.marker, 2));
-console.log(game.playMarker(player1.marker, 4));
+console.log(game.playMarker(player2.marker, 4));
+console.log(game.playMarker(player1.marker, 2));
 console.log(game.playMarker(player2.marker, 3));
 console.log(game.playMarker(player1.marker, 6));
 console.log(game.playMarker(player2.marker, 8));
-console.log(game.playMarker(player1.marker, 7));
-console.log(game.playMarker(player2.marker, 1));
+console.log(game.playMarker(player1.marker, 1));
+console.log(game.playMarker(player2.marker, 7));
 console.log(gameBoard.markerArray);
