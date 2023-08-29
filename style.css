@@ -1,0 +1,10 @@
+button {
+    width: 100px;
+    height: 100px;
+}
+
+.tictactoe-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+
+}

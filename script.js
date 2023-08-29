@@ -1,16 +1,50 @@
 gameBoard = (() => {
+
     const markerArray = Array.apply(null, Array(9)).map(function (){ })
+
+    let buttons = document.querySelectorAll('button');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            button.textContent = game.getActivePlayer().marker;
+            game.playMarker(game.getActivePlayer().marker, button.dataset.index);
+            game.switchActivePlayer();
+            button.disabled = true;
+        });
+    });
+
+    const endGame = () => {
+        buttons.forEach(button => {
+            button.disabled = true;
+        })
+        if (game.winner !== undefined) {
+            window.alert(game.winner.name + " wins! Refresh to play again");
+        } else {
+            window.alert("Tied game. Refresh to play again");
+        }
+    }
 
     return {markerArray};
 })();
 
 game = (() => {
 
-    const gameFinished = false;
-    // const activePlayer;
+    const player1 = player(prompt('Enter name for playerX', 'playerX'), 'X');
+    const player2 = player(prompt('Enter name for playerO', 'playerO'), 'O');
+    const players = [player1, player2];
+
+    let activePlayerIndex = 1;
+    let activePlayer = players[activePlayerIndex];
 
     const playMarker = (markerPlayed, squarePlayed) => {
         gameBoard.markerArray[squarePlayed] = markerPlayed;
+
+
+        if (checkForWin(markerPlayed, squarePlayed)) {
+            if(alert(activePlayer.name + " wins! Refresh to play again")){}
+            else    window.location.reload(); 
+        }
+        
         return checkForWin(markerPlayed, squarePlayed);
     }
 
@@ -90,29 +124,34 @@ game = (() => {
     }
 
 
-    return {playMarker, checkForWin};
+
+    const switchActivePlayer = () => {
+        activePlayerIndex = (activePlayerIndex + 1) % 2;
+        activePlayer = players[activePlayerIndex];
+        return 0;
+    }
+
+    const getActivePlayer = () => {
+        return activePlayer;
+    }
+
+
+    return {players, activePlayer, playMarker, checkForWin, switchActivePlayer, getActivePlayer};
 })();
 
 function player(name, marker) {
-
-
-    return { name, marker };
-
+    return {name, marker};
 }
-
-const player1 = player('Kevin', 'X');
-const player2 = player('Alex', 'O');
-
 
 
 //turn logic: user clicks empty square (disable squares that are not filled), square is updated with marker, check for win or full board, if no win, next turn.
 
-console.log(game.playMarker(player1.marker, 0));
-console.log(game.playMarker(player2.marker, 5));
-console.log(game.playMarker(player1.marker, 2));
-console.log(game.playMarker(player2.marker, 3));
-console.log(game.playMarker(player1.marker, 4));
-console.log(game.playMarker(player2.marker, 6));
-console.log(game.playMarker(player1.marker, 8));
-console.log(game.playMarker(player2.marker, 7));
-console.log(gameBoard.markerArray);
+// console.log(game.playMarker(player1.marker, 0));
+// console.log(game.playMarker(player2.marker, 5));
+// console.log(game.playMarker(player1.marker, 2));
+// console.log(game.playMarker(player2.marker, 3));
+// console.log(game.playMarker(player1.marker, 4));
+// console.log(game.playMarker(player2.marker, 6));
+// console.log(game.playMarker(player1.marker, 8));
+// console.log(game.playMarker(player2.marker, 7));
+// console.log(gameBoard.markerArray);
