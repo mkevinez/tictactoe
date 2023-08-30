@@ -1,13 +1,14 @@
 gameBoard = (() => {
 
-    const markerArray = Array.apply(null, Array(9)).map(function (){ })
+    const boardArray = Array.apply(null, Array(9)).map(function (){ })
 
     let buttons = document.querySelectorAll('button');
 
     buttons.forEach(button => {
         button.addEventListener('click', (e) => {
             button.textContent = game.getActivePlayer().marker;
-            game.playMarker(game.getActivePlayer().marker, button.dataset.index);
+            console.log(button.dataset.index);
+            game.playMarker(game.getActivePlayer(), button.dataset.index);
             game.switchActivePlayer();
             button.disabled = true;
         });
@@ -24,45 +25,53 @@ gameBoard = (() => {
         }
     }
 
-    return {markerArray};
+    const getMarkerAtIndex = (index) => {
+        console.log(gameBoard.boardArray);
+        console.log("index: " + index)
+        console.log("marker at: " + boardArray[index])
+        return boardArray[index];
+    }
+
+    return {boardArray, getMarkerAtIndex};
 })();
 
 game = (() => {
 
-    const player1 = player(prompt('Enter name for playerX', 'playerX'), 'X');
-    const player2 = player(prompt('Enter name for playerO', 'playerO'), 'O');
+    const player1 = player(prompt('Enter name for playerX', 'PlayerX'), 'X');
+    const player2 = player(prompt('Enter name for playerO', 'PlayerO'), 'O');
     const players = [player1, player2];
 
     let activePlayerIndex = 1;
     let activePlayer = players[activePlayerIndex];
 
-    const playMarker = (markerPlayed, squarePlayed) => {
-        gameBoard.markerArray[squarePlayed] = markerPlayed;
+    const playMarker = (player, squarePlayed) => {
+        gameBoard.boardArray[squarePlayed] = player.marker;
 
-
-        if (checkForWin(markerPlayed, squarePlayed)) {
+        if (checkForWin(player, squarePlayed)) {
             if(alert(activePlayer.name + " wins! Refresh to play again")){}
             else    window.location.reload(); 
         }
-        
-        return checkForWin(markerPlayed, squarePlayed);
+
+        return 0;
+        // return checkForWin(player, squarePlayed);
     }
 
-    const checkForWin = (markerPlayed, squarePlayed) => {
-        return (checkVerticals(markerPlayed, squarePlayed) || checkHorizontals(markerPlayed, squarePlayed) || checkDiagonals(markerPlayed, squarePlayed))
+    const checkForWin = (player, squarePlayed) => {
+        return (checkVerticals(player, squarePlayed) || checkHorizontals(player, squarePlayed) || checkDiagonals(player, squarePlayed))
     }
 
-    const checkVerticals = (markerPlayed, squarePlayed) => {
+    const checkVerticals = (player, squarePlayed) => {
 
         // take the marker, and check the following: matching marker at +3/+6 on index, matching marker at +3/-3 on index, matching marker at -3/-6 on index
 
         let counter = 0;
 
-        // for each array, subtract the index from marker (0-2) and remainder 3, if the answer is 0, then it is the correct index. Finding two matches. 
+        // compare the marker played with each square on the board. If the markers match, subtract indexes from each other on the array and remainder 3. 
+        // If the answer is 0, that means the two matches are 3 indexes away from each other in either direction, meaning the align vertically. 
 
-        gameBoard.markerArray.forEach((squareMarker, squareIndex) => {
-            if (markerPlayed === squareMarker) {
-                if ((squarePlayed - squareIndex) % 3 === 0) {
+        gameBoard.boardArray.forEach((boardMarker, boardIndex) => {
+            if (player.marker === boardMarker) {
+                if ((squarePlayed - boardIndex) % 3 === 0) {
                     counter++;
                 }
             }
@@ -71,20 +80,22 @@ game = (() => {
         return counter === 3;
     }
 
-    function checkHorizontals(markerPlayed, squarePlayed) {
+    function checkHorizontals(player, squarePlayed) {
 
         // take the marker, and check the following: matching marker at +1/-1 if index is 1/4/7, matching marker at +1/+2 if index is 0/3/6, matching marker at -1/-2 if index is 2/5/8
 
-        if (squarePlayed === 1 || 4 || 7) {
-            if (gameBoard.markerArray[squarePlayed - 1] === markerPlayed && gameBoard.markerArray[squarePlayed + 1] === markerPlayed) {
+        squarePlayed = parseInt(squarePlayed);
+
+        if (squarePlayed === 1 || squarePlayed === 4 || squarePlayed === 7) {
+            if (gameBoard.getMarkerAtIndex(squarePlayed - 1) === player.marker && gameBoard.getMarkerAtIndex(squarePlayed + 1) === player.marker) {
                 return true;
             }
-        } else if (squarePlayed === 0 || 3 || 6 ) {
-            if (gameBoard.markerArray[squarePlayed + 2] === markerPlayed && gameBoard.markerArray[squarePlayed + 1] === markerPlayed) {
+        } else if (squarePlayed === 0 || squarePlayed === 3 || squarePlayed === 6 ) {
+            if (gameBoard.getMarkerAtIndex(squarePlayed + 2) === player.marker && gameBoard.getMarkerAtIndex(squarePlayed + 1) === player.marker) {
                 return true;
             }
-        } else if (squarePlayed === 2 || 5 || 8 ) {
-            if (gameBoard.markerArray[squarePlayed - 2] === markerPlayed && gameBoard.markerArray[squarePlayed - 1] === markerPlayed) {
+        } else if (squarePlayed === 2 || squarePlayed === 5 || squarePlayed === 8) {
+            if (gameBoard.getMarkerAtIndex(squarePlayed - 2) === player.marker && gameBoard.getMarkerAtIndex(squarePlayed - 1) === player.marker) {
                 return true;
             }
         }
@@ -92,29 +103,31 @@ game = (() => {
         return false;
     }
 
-    function checkDiagonals(markerPlayed, squarePlayed) {
+    function checkDiagonals(player, squarePlayed) {
+
+        squarePlayed = parseInt(squarePlayed);
 
         // take the marker, and check the following: matching marker at +4/+8 if index is 0, matching marker at +2/+4 if index is 2, matching marker at -2/+2 if index is 4
         // matching marker at -2/-4 if index is 6, matching marker at -4/-8 if index is 8
 
         if (squarePlayed === 0) {
-            if (gameBoard.markerArray[squarePlayed + 4] === markerPlayed && gameBoard.markerArray[squarePlayed + 8] === markerPlayed) {
+            if (gameBoard.boardArray[squarePlayed + 4] === player.marker && gameBoard.boardArray[squarePlayed + 8] === player.marker) {
                 return true;
             }
         } else if (squarePlayed === 2) {
-            if (gameBoard.markerArray[squarePlayed + 2] === markerPlayed && gameBoard.markerArray[squarePlayed + 4] === markerPlayed) {
+            if (gameBoard.boardArray[squarePlayed + 2] === player.marker && gameBoard.boardArray[squarePlayed + 4] === player.marker) {
                 return true;
             }
         } else if (squarePlayed === 4 ) {
-            if (gameBoard.markerArray[squarePlayed - 2] === markerPlayed && gameBoard.markerArray[squarePlayed + 2] === markerPlayed) {
+            if (gameBoard.boardArray[squarePlayed - 2] === player.marker && gameBoard.boardArray[squarePlayed + 2] === player.marker) {
                 return true;
             }
         } else if (squarePlayed === 6) {
-            if (gameBoard.markerArray[squarePlayed - 2] === markerPlayed && gameBoard.markerArray[squarePlayed - 4] === markerPlayed) {
+            if (gameBoard.boardArray[squarePlayed - 2] === player.marker && gameBoard.boardArray[squarePlayed - 4] === player.marker) {
                 return true;
             }
         } else if (squarePlayed === 8) {
-            if (gameBoard.markerArray[squarePlayed - 4] === markerPlayed && gameBoard.markerArray[squarePlayed - 8] === markerPlayed) {
+            if (gameBoard.boardArray[squarePlayed - 4] === player.marker && gameBoard.boardArray[squarePlayed - 8] === player.marker) {
                 return true;
             }
         } else {
@@ -142,16 +155,3 @@ game = (() => {
 function player(name, marker) {
     return {name, marker};
 }
-
-
-//turn logic: user clicks empty square (disable squares that are not filled), square is updated with marker, check for win or full board, if no win, next turn.
-
-// console.log(game.playMarker(player1.marker, 0));
-// console.log(game.playMarker(player2.marker, 5));
-// console.log(game.playMarker(player1.marker, 2));
-// console.log(game.playMarker(player2.marker, 3));
-// console.log(game.playMarker(player1.marker, 4));
-// console.log(game.playMarker(player2.marker, 6));
-// console.log(game.playMarker(player1.marker, 8));
-// console.log(game.playMarker(player2.marker, 7));
-// console.log(gameBoard.markerArray);
